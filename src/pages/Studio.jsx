@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { ArrowUpRight } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export default function Studio() {
   const [input, setInput] = useState("");
@@ -92,14 +93,29 @@ export default function Studio() {
           // Chat started: show messages above, input at bottom
           <>
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className="max-w-md px-4 py-3 rounded-2xl bg-[#EBECEE] text-[#111827] font-[Arial]"
-                >
-                  {msg}
-                </div>
-              ))}
+              {messages.map((msg, i) => {
+                // Bot messages: render markdown
+                if (msg.startsWith("🤖 Marketable:")) {
+                  const markdownContent = msg.replace("🤖 Marketable:", "").trim();
+                  return (
+                    <div
+                      key={i}
+                      className="max-w-md px-4 py-3 rounded-2xl bg-[#EBECEE] text-[#111827] font-[Arial]"
+                    >
+                      <ReactMarkdown>{markdownContent}</ReactMarkdown>
+                    </div>
+                  );
+                }
+                // User messages: render plain text
+                return (
+                  <div
+                    key={i}
+                    className="max-w-md px-4 py-3 rounded-2xl bg-[#DBEAFE] text-[#111827] font-[Arial]"
+                  >
+                    {msg}
+                  </div>
+                );
+              })}
               {loading && (
                 <div className="max-w-md px-4 py-3 rounded-2xl bg-[#EBECEE] text-[#6B7280] font-[Arial] italic">
                   Thinking...
