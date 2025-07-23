@@ -9,6 +9,7 @@ export default function Studio() {
   const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mode, setMode] = useState("ad_copy"); // NEW: mode state
 
   // handleSend will post user input and append both user and bot messages
   const handleSend = async () => {
@@ -25,7 +26,7 @@ export default function Studio() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt_type: "ad_copy",       // 🔁 You can make this dynamic later
+          prompt_type: mode, // NEW: send mode as prompt_type
           user_input: userMessage,
         }),
       });
@@ -44,34 +45,46 @@ export default function Studio() {
     }
   };
 
-  // Extracted InputArea; width expanded to max-w-2xl
+  // InputArea with Mode Dropdown
   const InputArea = (
     <div className="w-full max-w-2xl border-t border-[#EBECEE] bg-[#F9FAFB] px-4 py-3">
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          placeholder="let's build your next campaign"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="
-            flex-1
-            rounded-xl
-            border border-[#EBECEE]
-            bg-white
-            px-4 py-3
-            text-[#75787D]
-            font-[Arial]
-            placeholder-[#75787D]
-            focus:outline-none
-          "
-        />
-        <button
-          className="bg-[#EBECEE] p-3 rounded-xl"
-          onClick={handleSend}
-          disabled={loading}
+      <div className="flex flex-col gap-2">
+        {/* Mode Selector */}
+        <select
+          value={mode}
+          onChange={e => setMode(e.target.value)}
+          className="mb-1 w-56 p-2 rounded border border-[#EBECEE] bg-white text-[#111827] font-[Arial] text-sm"
         >
-          <ArrowUpRight className="text-white w-5 h-5" />
-        </button>
+          <option value="ad_copy">Ad Copy</option>
+          <option value="product_page_copy">Product Page Copy</option>
+          {/* Add more modes as you scale */}
+        </select>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder={mode === "ad_copy" ? "let's build your next campaign" : "describe your product or paste product info"}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="
+              flex-1
+              rounded-xl
+              border border-[#EBECEE]
+              bg-white
+              px-4 py-3
+              text-[#75787D]
+              font-[Arial]
+              placeholder-[#75787D]
+              focus:outline-none
+            "
+          />
+          <button
+            className="bg-[#EBECEE] p-3 rounded-xl"
+            onClick={handleSend}
+            disabled={loading}
+          >
+            <ArrowUpRight className="text-white w-5 h-5" />
+          </button>
+        </div>
       </div>
     </div>
   );
