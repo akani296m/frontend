@@ -12,14 +12,15 @@ import {
   Settings,
   HelpCircle,
 } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
 export default function Sidebar({ darkMode, setDarkMode }) {
   const navItems = [
-    { label: 'Dashboard', icon: LayoutGrid, active: false },
-    { label: 'Campaign', icon: Bell, active: false, badge: '99+' },
-    { label: 'Assets', icon: FileText, active: false },
-    { label: 'Studio', icon: DollarSign, active: true },
-    { label: 'Performance', icon: LineChart, active: false },
+    { label: 'Dashboard', icon: LayoutGrid, to: '/' },
+    { label: 'Campaigns', icon: Bell, to: '/campaigns', badge: '99+' },
+    { label: 'Assets', icon: FileText, to: '/assets' },
+    { label: 'Studio', icon: DollarSign, to: '/studio' },
+    { label: 'Performance', icon: LineChart, to: '/performance' },
   ];
 
   const [favorites, setFavorites] = useState([
@@ -76,17 +77,20 @@ export default function Sidebar({ darkMode, setDarkMode }) {
       {/* Nav */}
       <nav className="flex-1">
         <ul>
-          {navItems.map(({ label, icon: Icon, active, badge }) => (
+          {navItems.map(({ label, icon: Icon, to, badge }) => (
             <li key={label} className="mb-2">
-              <button
-                className={`flex items-center w-full py-2 px-4 rounded-lg ${
-                  active
+              <NavLink
+                to={to}
+                className={({ isActive }) =>
+                  `flex items-center w-full py-2 px-4 rounded-lg transition-all ${
+                    isActive
                     ? 'bg-[#EFEAFE] text-[#7355FF] border-l-4 border-[#7355FF]'
                     : 'text-[#4B5563] hover:bg-gray-100'
-                }`}
+                  }`
+                }
               >
                 <div className="relative mr-3">
-                  <Icon size={24} className={active ? 'text-[#7355FF]' : 'text-[#4B5563]'} />
+                  <Icon size={24} />
                   {badge && (
                     <span className="absolute -top-1 -right-1 bg-[#EF4444] text-white text-[10px] rounded-full px-1">
                       {badge}
@@ -94,7 +98,7 @@ export default function Sidebar({ darkMode, setDarkMode }) {
                   )}
                 </div>
                 {label}
-              </button>
+              </NavLink>
             </li>
           ))}
         </ul>
