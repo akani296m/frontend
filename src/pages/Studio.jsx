@@ -11,6 +11,9 @@ export default function Studio() {
   const [error, setError] = useState("");
   const [mode, setMode] = useState("ad_copy");
 
+  // Determine if there's text in the input
+  const isActive = input.trim().length > 0;
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -47,6 +50,9 @@ export default function Studio() {
   const InputArea = (
     <div className="w-full max-w-2xl border-t border-[#EBECEE] bg-[#F9FAFB] px-4 py-3">
       <div className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold text-[#111827]">
+          Welcome, what do you want to work on?
+        </h2>
         <select
           value={mode}
           onChange={(e) => setMode(e.target.value)}
@@ -68,11 +74,11 @@ export default function Studio() {
             className="flex-1 rounded-xl border border-[#EBECEE] bg-white px-4 py-3 text-[#75787D] font-[Arial] placeholder-[#75787D] focus:outline-none"
           />
           <button
-            className="bg-[#EBECEE] p-3 rounded-xl"
+            className={`p-3 rounded-xl ${isActive ? 'bg-[#328DF1]' : 'bg-[#EBECEE]'}`}
             onClick={handleSend}
             disabled={loading}
           >
-            <ArrowUpRight className="text-white w-5 h-5" />
+            <ArrowUpRight className={`${isActive ? 'text-[#FFFFFF]' : 'text-[#111827]'} w-5 h-5`} />
           </button>
         </div>
       </div>
@@ -109,6 +115,7 @@ export default function Studio() {
 
                   return (
                     <div key={i} className="w-full max-w-3xl p-6 bg-white rounded-xl shadow-md space-y-6 font-[Arial]">
+                      {/* Hero Section */}
                       <section>
                         <h1 className="text-2xl font-bold">{parsed.headline}</h1>
                         <p className="text-lg text-gray-600">{parsed.subheadline}</p>
@@ -116,11 +123,13 @@ export default function Studio() {
                         <button className="bg-[#111827] text-white py-2 px-4 rounded-lg">{parsed.cta_hero}</button>
                       </section>
 
+                      {/* Story Section */}
                       <section>
                         <p className="text-base">{parsed.relatable_story}</p>
                         <p className="mt-2 font-medium">{parsed.product_reveal}</p>
                       </section>
 
+                      {/* Benefits */}
                       <section>
                         <h2 className="font-semibold">Key Benefits</h2>
                         <ul className="list-disc ml-5 text-sm text-gray-800">
@@ -128,6 +137,7 @@ export default function Studio() {
                         </ul>
                       </section>
 
+                      {/* Testimonials */}
                       <section>
                         <h2 className="font-semibold">Testimonials</h2>
                         {parsed.testimonials.map((t, i) => (
@@ -135,6 +145,7 @@ export default function Studio() {
                         ))}
                       </section>
 
+                      {/* Trust Badges */}
                       <section>
                         <h2 className="font-semibold">Trust Badges</h2>
                         <div className="flex flex-wrap gap-2">
@@ -144,12 +155,14 @@ export default function Studio() {
                         </div>
                       </section>
 
+                      {/* Guarantee & CTA */}
                       <section className="text-sm font-medium">
                         <p>{parsed.guarantee}</p>
                         <p className="text-red-600 mt-2">{parsed.urgency_text}</p>
                         <button className="mt-2 bg-blue-600 text-white py-2 px-6 rounded">{parsed.cta_final}</button>
                       </section>
 
+                      {/* FAQs */}
                       <section>
                         <h2 className="font-semibold">FAQs</h2>
                         {parsed.faq.map((item, i) => (
@@ -194,4 +207,3 @@ export default function Studio() {
     </div>
   );
 }
-
