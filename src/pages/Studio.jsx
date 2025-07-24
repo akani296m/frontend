@@ -9,9 +9,8 @@ export default function Studio() {
   const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [mode, setMode] = useState("ad_copy"); // NEW: mode state
+  const [mode, setMode] = useState("ad_copy");
 
-  // handleSend will post user input and append both user and bot messages
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -26,7 +25,7 @@ export default function Studio() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt_type: mode, // NEW: send mode as prompt_type
+          prompt_type: mode,
           user_input: userMessage,
         }),
       });
@@ -45,37 +44,28 @@ export default function Studio() {
     }
   };
 
-  // InputArea with Mode Dropdown
   const InputArea = (
     <div className="w-full max-w-2xl border-t border-[#EBECEE] bg-[#F9FAFB] px-4 py-3">
       <div className="flex flex-col gap-2">
-        {/* Mode Selector */}
         <select
           value={mode}
-          onChange={e => setMode(e.target.value)}
+          onChange={(e) => setMode(e.target.value)}
           className="mb-1 w-56 p-2 rounded border border-[#EBECEE] bg-white text-[#111827] font-[Arial] text-sm"
         >
           <option value="ad_copy">Ad Copy</option>
           <option value="product_page_copy">Product Page Copy</option>
-          {/* Add more modes as you scale */}
         </select>
         <div className="flex items-center gap-2">
           <input
             type="text"
-            placeholder={mode === "ad_copy" ? "let's build your next campaign" : "describe your product or paste product info"}
+            placeholder={
+              mode === "ad_copy"
+                ? "let's build your next campaign"
+                : "describe your product or paste product info"
+            }
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="
-              flex-1
-              rounded-xl
-              border border-[#EBECEE]
-              bg-white
-              px-4 py-3
-              text-[#75787D]
-              font-[Arial]
-              placeholder-[#75787D]
-              focus:outline-none
-            "
+            className="flex-1 rounded-xl border border-[#EBECEE] bg-white px-4 py-3 text-[#75787D] font-[Arial] placeholder-[#75787D] focus:outline-none"
           />
           <button
             className="bg-[#EBECEE] p-3 rounded-xl"
@@ -90,36 +80,93 @@ export default function Studio() {
   );
 
   return (
-    <div
-      className="flex min-h-screen"
-      style={{ filter: darkMode ? "invert(1)" : "none" }}
-    >
+    <div className="flex min-h-screen" style={{ filter: darkMode ? "invert(1)" : "none" }}>
       <Sidebar darkMode={darkMode} setDarkMode={setDarkMode} />
 
       <main className="flex-1 flex flex-col bg-[#F9FAFB]">
         {messages.length === 0 ? (
-          // No chat yet: center the input
-          <div className="flex-1 flex items-center justify-center">
-            {InputArea}
-          </div>
+          <div className="flex-1 flex items-center justify-center">{InputArea}</div>
         ) : (
-          // Chat started: show messages above, input at bottom
           <>
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {messages.map((msg, i) => {
-                // Bot messages: render markdown
                 if (msg.startsWith("🤖 Marketable:")) {
-                  const markdownContent = msg.replace("🤖 Marketable:", "").trim();
+                  const content = msg.replace("🤖 Marketable:", "").trim();
+
+                  let parsed;
+                  try {
+                    parsed = JSON.parse(content);
+                  } catch (e) {
+                    return (
+                      <div
+                        key={i}
+                        className="max-w-md px-4 py-3 rounded-2xl bg-[#EBECEE] text-[#111827] font-[Arial]"
+                      >
+                        <ReactMarkdown>{content}</ReactMarkdown>
+                      </div>
+                    );
+                  }
+
                   return (
-                    <div
-                      key={i}
-                      className="max-w-md px-4 py-3 rounded-2xl bg-[#EBECEE] text-[#111827] font-[Arial]"
-                    >
-                      <ReactMarkdown>{markdownContent}</ReactMarkdown>
+                    <div key={i} className="w-full max-w-3xl p-6 bg-white rounded-xl shadow-md space-y-6 font-[Arial]">
+                      <section>
+                        <h1 className="text-2xl font-bold">{parsed.headline}</h1>
+                        <p className="text-lg text-gray-600">{parsed.subheadline}</p>
+                        <div className="my-3 text-sm italic text-gray-500">{parsed.visual_placeholder}</div>
+                        <button className="bg-[#111827] text-white py-2 px-4 rounded-lg">{parsed.cta_hero}</button>
+                      </section>
+
+                      <section>
+                        <p className="text-base">{parsed.relatable_story}</p>
+                        <p className="mt-2 font-medium">{parsed.product_reveal}</p>
+                      </section>
+
+                      <section>
+                        <h2 className="font-semibold">Key Benefits</h2>
+                        <ul className="list-disc ml-5 text-sm text-gray-800">
+                          {parsed.key_benefits.map((b, i) => <li key={i}>{b}</li>)}
+                        </ul>
+                      </section>
+
+                      <section>
+                        <h2 className="font-semibold">Testimonials</h2>
+                        {parsed.testimonials.map((t, i) => (
+                          <blockquote key={i} className="text-sm italic text-gray-700">"{t}"</blockquote>
+                        ))}
+                      </section>
+
+                      <section>
+                        <h2 className="font-semibold">Trust Badges</h2>
+                        <div className="flex flex-wrap gap-2">
+                          {parsed.trust_badges.map((badge, i) => (
+                            <span key={i} className="text-xs bg-gray-200 px-2 py-1 rounded">{badge}</span>
+                          ))}
+                        </div>
+                      </section>
+
+                      <section className="text-sm font-medium">
+                        <p>{parsed.guarantee}</p>
+                        <p className="text-red-600 mt-2">{parsed.urgency_text}</p>
+                        <button className="mt-2 bg-blue-600 text-white py-2 px-6 rounded">{parsed.cta_final}</button>
+                      </section>
+
+                      <section>
+                        <h2 className="font-semibold">FAQs</h2>
+                        {parsed.faq.map((item, i) => (
+                          <div key={i} className="mt-2">
+                            <strong>Q: {item.question}</strong>
+                            <p>A: {item.answer}</p>
+                          </div>
+                        ))}
+                      </section>
+
+                      <div className="mt-4 text-center text-sm text-green-700 font-semibold">
+                        {parsed.sticky_cart_note}
+                      </div>
                     </div>
                   );
                 }
-                // User messages: render plain text
+
                 return (
                   <div
                     key={i}
@@ -147,3 +194,4 @@ export default function Studio() {
     </div>
   );
 }
+
