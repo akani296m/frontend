@@ -1,9 +1,10 @@
 // src/pages/CampaignsPage.jsx
 import React, { useState, useMemo } from 'react';
 import { Lock } from 'lucide-react';
-import Layout from '../components/Layout';
+import { useNavigate } from 'react-router-dom';
+import Layout from '../components/layout';
 
-const CAMPAIGNS = [
+const INITIAL_CAMPAIGNS = [
   {
     id: 1,
     name: 'Collagen Mask Ad Campaign',
@@ -23,15 +24,36 @@ const CAMPAIGNS = [
 export default function CampaignsPage() {
   const [activeTab, setActiveTab] = useState('my');
   const [search, setSearch] = useState('');
+  const [campaigns, setCampaigns] = useState(INITIAL_CAMPAIGNS);
+  const [showModal, setShowModal] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newGoal, setNewGoal] = useState('');
+  const navigate = useNavigate();
 
   // filter campaigns by tab & search
   const filtered = useMemo(() => {
-    return CAMPAIGNS.filter((c) => {
-      const matchesTab = activeTab === 'all' || c.owner === 'Me'; // adjust owner logic
+    return campaigns.filter((c) => {
+      const matchesTab = activeTab === 'all' || c.owner === 'Me';
       const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
       return matchesTab && matchesSearch;
     });
-  }, [activeTab, search]);
+  }, [campaigns, activeTab, search]);
+
+  const handleCreate = () => {
+    if (!newName.trim() || !newGoal.trim()) return;
+    const newCampaign = {
+      id: Date.now(),
+      name: newName.trim(),
+      owner: 'Me',
+      lastModified: 'Just now',
+      visibility: 'private',
+      goal: newGoal.trim(),
+    };
+    setCampaigns((prev) => [newCampaign, ...prev]);
+    setNewName('');
+    setNewGoal('');
+    setShowModal(false);
+  };
 
   return (
     <Layout>
@@ -52,6 +74,7 @@ export default function CampaignsPage() {
             <p className="text-gray-500">Any projects you have created will appear here.</p>
           </div>
           <button
+            onClick={() => setShowModal(true)}
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
           >
             + Create new campaign
@@ -123,7 +146,11 @@ export default function CampaignsPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filtered.map((c) => (
-                <tr key={c.id}>
+                <tr
+                  key={c.id}
+                  onClick={() => navigate(`/campaigns/${c.id}`)}
+                  className="hover:bg-gray-100 cursor-pointer"
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{c.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{c.owner}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{c.lastModified}</td>
@@ -131,7 +158,6 @@ export default function CampaignsPage() {
                     <Lock className="mr-1" size={14} /> {c.visibility}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    {/* you can put a menu button here */}
                     <button className="text-gray-400 hover:text-gray-600">•••</button>
                   </td>
                 </tr>
@@ -147,6 +173,43 @@ export default function CampaignsPage() {
             </tbody>
           </table>
         </div>
+
+        {/* modal overlay */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg w-full max-w-md p-6">
+              <h2 className="text-xl font-semibold mb-4">New Campaign</h2>
+              <input
+                type="text"
+                placeholder="Campaign Name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                className="w-full mb-3 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Goal"
+                value={newGoal}
+                onChange={(e) => setNewGoal(e.target.value)}
+                className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none"
+              />
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreate}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  Create Campaign
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
