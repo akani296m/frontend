@@ -32,18 +32,12 @@ export default function Studio() {
       const res = await fetch("https://marketable.onrender.com/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt_type: mode,
-          user_input: userMessage,
-        }),
+        body: JSON.stringify({ prompt_type: mode, user_input: userMessage }),
       });
 
       if (!res.ok) throw new Error("Failed to fetch response from API.");
       const data = await res.json();
-      setMessages((prev) => [
-        ...prev,
-        `🤖 Marketable: ${data.content || "No response"}`,
-      ]);
+      setMessages((prev) => [...prev, `🤖 Marketable: ${data.content || "No response"}`]);
     } catch (err) {
       console.error("API Error:", err);
       setError("Something went wrong. Please try again.");
@@ -118,8 +112,42 @@ export default function Studio() {
                 );
               }
 
+              // Custom renderer for ad_copy mode
+              if (mode === "ad_copy") {
+                return (
+                  <div key={i} className="w-full max-w-2xl p-6 bg-white rounded-xl shadow space-y-4 font-[Arial]">
+                    <div>
+                      <h2 className="text-lg font-bold">Headline</h2>
+                      <p>{parsed.headline}</p>
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold">Ad Copy</h2>
+                      <p>{parsed.primary_texts.short_form}</p>
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold">Description</h2>
+                      <p>{parsed.primary_texts.long_form}</p>
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold">Call to Action</h2>
+                      <p>[{parsed.call_to_action}]</p>
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold">Visual Concept</h2>
+                      <p>{parsed.visual_hook}</p>
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold">URL</h2>
+                      <p>www.example.com/xbox</p>
+                    </div>
+                  </div>
+                );
+              }
+
+              // Fallback rendering for other modes
               return (
                 <div key={i} className="w-full max-w-3xl p-6 bg-white rounded-xl shadow-md space-y-6 font-[Arial]">
+                  {/* Example: product_page_copy rendering */}
                   <section>
                     <h1 className="text-2xl font-bold">{parsed.headline}</h1>
                     <p className="text-lg text-gray-600">{parsed.subheadline}</p>
@@ -135,22 +163,22 @@ export default function Studio() {
                   <section>
                     <h2 className="font-semibold">Key Benefits</h2>
                     <ul className="list-disc ml-5 text-sm text-gray-800">
-                      {parsed.key_benefits.map((b, i) => <li key={i}>{b}</li>)}
+                      {parsed.key_benefits.map((b, idx) => <li key={idx}>{b}</li>)}
                     </ul>
                   </section>
 
                   <section>
                     <h2 className="font-semibold">Testimonials</h2>
-                    {parsed.testimonials.map((t, i) => (
-                      <blockquote key={i} className="text-sm italic text-gray-700">"{t}"</blockquote>
+                    {parsed.testimonials.map((t, idx) => (
+                      <blockquote key={idx} className="text-sm italic text-gray-700">"{t}"</blockquote>
                     ))}
                   </section>
 
                   <section>
                     <h2 className="font-semibold">Trust Badges</h2>
                     <div className="flex flex-wrap gap-2">
-                      {parsed.trust_badges.map((badge, i) => (
-                        <span key={i} className="text-xs bg-gray-200 px-2 py-1 rounded">{badge}</span>
+                      {parsed.trust_badges.map((badge, idx) => (
+                        <span key={idx} className="text-xs bg-gray-200 px-2 py-1 rounded">{badge}</span>
                       ))}
                     </div>
                   </section>
@@ -163,8 +191,8 @@ export default function Studio() {
 
                   <section>
                     <h2 className="font-semibold">FAQs</h2>
-                    {parsed.faq.map((item, i) => (
-                      <div key={i} className="mt-2">
+                    {parsed.faq.map((item, idx) => (
+                      <div key={idx} className="mt-2">
                         <strong>Q: {item.question}</strong>
                         <p>A: {item.answer}</p>
                       </div>
@@ -178,6 +206,7 @@ export default function Studio() {
               );
             }
 
+            // User messages or error/loading blocks
             return (
               <div
                 key={i}
@@ -187,20 +216,22 @@ export default function Studio() {
               </div>
             );
           })}
+
           {loading && (
             <div className="max-w-md px-4 py-3 rounded-2xl bg-[#EBECEE] text-[#6B7280] font-[Arial] italic">
               Thinking...
             </div>
           )}
+
           {error && (
             <div className="max-w-md px-4 py-3 rounded-2xl bg-red-100 text-red-700 font-[Arial]">
               {error}
             </div>
           )}
         </div>
+
         {InputArea}
       </main>
     </div>
   );
 }
-
